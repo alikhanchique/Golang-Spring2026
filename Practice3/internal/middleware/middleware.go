@@ -3,10 +3,16 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
-const validAPIKey = "ali"
+func getAPIKey() string {
+	if key := os.Getenv("API_KEY"); key != "" {
+		return key
+	}
+	return "my-secret-api-key"
+}
 
 type responseWriter struct {
 	http.ResponseWriter
@@ -45,7 +51,7 @@ func APIKeyAuth(next http.Handler) http.Handler {
 			http.Error(w, `{"error":"missing X-API-KEY header"}`, http.StatusUnauthorized)
 			return
 		}
-		if key != validAPIKey {
+		if key != getAPIKey() {
 			http.Error(w, `{"error":"invalid X-API-KEY"}`, http.StatusUnauthorized)
 			return
 		}
